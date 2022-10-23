@@ -33,7 +33,11 @@ const stiprumai = tempStiprumas as Stiprumas[];
 const vartotojai = tempVartotojai as Vartotojas[];
 
 const app = express();
+app.use(express.json());
 const port = 3000;
+const WILI_BOX_1 = 'wiliboxas1';
+const WILI_BOX_2 = 'wiliboxas2';
+const WILI_BOX_3 = 'wiliboxas3';
 
 const users: User[] = [];
 let macAddresses: string[] = vartotojai.map(
@@ -114,64 +118,6 @@ for (let y = 0; y <= maxY; y++) {
 	}
 }
 
-// -----------------------------------------
-const WILI_BOX_1 = 'wiliboxas1';
-const WILI_BOX_2 = 'wiliboxas2';
-const WILI_BOX_3 = 'wiliboxas3';
-users.forEach((user: User) => {
-	const rss1 = user.stiprumai.find(
-		(s: Stiprumas) => s.sensorius === WILI_BOX_1
-	)?.stiprumas;
-	const rss2 = user.stiprumai.find(
-		(s: Stiprumas) => s.sensorius === WILI_BOX_2
-	)?.stiprumas;
-	const rss3 = user.stiprumai.find(
-		(s: Stiprumas) => s.sensorius === WILI_BOX_3
-	)?.stiprumas;
-
-	var indexOfMatavimas = 0;
-	var minDistance = Number.MAX_VALUE;
-
-	matavimai.forEach((matavimas: Matavimas, index: number) => {
-		const rss1m = matavimas.stiprumai?.find(
-			(s: Stiprumas) => s.sensorius === WILI_BOX_1
-		)?.stiprumas;
-		const rss2m = matavimas.stiprumai?.find(
-			(s: Stiprumas) => s.sensorius === WILI_BOX_2
-		)?.stiprumas;
-		const rss3m = matavimas.stiprumai?.find(
-			(s: Stiprumas) => s.sensorius === WILI_BOX_3
-		)?.stiprumas;
-
-		if (
-			rss1 === undefined ||
-			rss2 === undefined ||
-			rss3 === undefined ||
-			rss1m === undefined ||
-			rss2m === undefined ||
-			rss3m === undefined
-		) {
-			return;
-		}
-
-		let rss1sq = Math.pow(rss1 - rss1m, 2);
-		let rss2sq = Math.pow(rss2 - rss2m, 2);
-		let rss3sq = Math.pow(rss3 - rss3m, 2);
-
-		let rssSum = rss1sq + rss2sq + rss3sq;
-		let distance = Math.sqrt(rssSum);
-
-		if (distance < minDistance) {
-			minDistance = distance;
-			indexOfMatavimas = index;
-		}
-	});
-
-	const matavimas = matavimai[indexOfMatavimas];
-	grid[matavimas.y][matavimas.x] = 2;
-});
-// -----------------------------------------
-
 grid.forEach((row: number[]) => {
 	console.log(row.join(''));
 });
@@ -182,6 +128,85 @@ app.get('/', (req, res) => {
 		string += row.join('') + '\n';
 	});
 	res.send(string);
+});
+
+app.post('/', (req, res) => {
+	const messages: string[] = [];
+	const data: any[] = [];
+
+	const userList = req.body?.users || users;
+
+	try {
+		userList.forEach((user: User) => {
+			const rss1 = user.stiprumai.find(
+				(s: Stiprumas) => s.sensorius === WILI_BOX_1
+			)?.stiprumas;
+			const rss2 = user.stiprumai.find(
+				(s: Stiprumas) => s.sensorius === WILI_BOX_2
+			)?.stiprumas;
+			const rss3 = user.stiprumai.find(
+				(s: Stiprumas) => s.sensorius === WILI_BOX_3
+			)?.stiprumas;
+
+			var indexOfMatavimas = 0;
+			var minDistance = Number.MAX_VALUE;
+
+			matavimai.forEach((matavimas: Matavimas, index: number) => {
+				const rss1m = matavimas.stiprumai?.find(
+					(s: Stiprumas) => s.sensorius === WILI_BOX_1
+				)?.stiprumas;
+				const rss2m = matavimas.stiprumai?.find(
+					(s: Stiprumas) => s.sensorius === WILI_BOX_2
+				)?.stiprumas;
+				const rss3m = matavimas.stiprumai?.find(
+					(s: Stiprumas) => s.sensorius === WILI_BOX_3
+				)?.stiprumas;
+
+				if (
+					rss1 === undefined ||
+					rss2 === undefined ||
+					rss3 === undefined ||
+					rss1m === undefined ||
+					rss2m === undefined ||
+					rss3m === undefined
+				) {
+					return;
+				}
+
+				let rss1sq = Math.pow(rss1 - rss1m, 2);
+				let rss2sq = Math.pow(rss2 - rss2m, 2);
+				let rss3sq = Math.pow(rss3 - rss3m, 2);
+
+				let rssSum = rss1sq + rss2sq + rss3sq;
+				let distance = Math.sqrt(rssSum);
+
+				if (distance < minDistance) {
+					minDistance = distance;
+					indexOfMatavimas = index;
+				}
+			});
+
+			const matavimas = matavimai[indexOfMatavimas];
+
+			messages.push(
+				`User ${user.mac} is at x: ${matavimas.x}, y: ${matavimas.y}, distance: ${minDistance}`
+			);
+			data.push({
+				mac: user.mac,
+				x: matavimas.x,
+				y: matavimas.y,
+				distance: minDistance,
+			});
+		});
+		res.send({
+			responses: messages,
+			responseData: data,
+		});
+	} catch (error) {
+		res.status(400).send({
+			message: "Provided format of the array isn't correct",
+		});
+	}
 });
 
 app.listen(port, () => {
