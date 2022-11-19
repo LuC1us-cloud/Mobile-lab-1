@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 	next();
 });
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 const WILI_BOX_1 = 'wiliboxas1';
 const WILI_BOX_2 = 'wiliboxas2';
 const WILI_BOX_3 = 'wiliboxas3';
