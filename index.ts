@@ -34,6 +34,12 @@ const vartotojai = tempVartotojai as Vartotojas[];
 
 const app = express();
 app.use(express.json());
+
+app.use((req, res, next) => {
+	console.log(`${req.method} ${req.path} - ${req.ip}`);
+	next();
+});
+
 const port = 3000;
 const WILI_BOX_1 = 'wiliboxas1';
 const WILI_BOX_2 = 'wiliboxas2';
