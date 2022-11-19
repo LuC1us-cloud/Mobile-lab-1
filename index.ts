@@ -133,7 +133,7 @@ app.get('/', (req, res) => {
 	grid.forEach((row: number[]) => {
 		string += row.join('') + '\n';
 	});
-	res.send(string);
+	res.send({ map: string });
 });
 
 app.post('/', (req, res) => {

@@ -15,7 +15,7 @@ app.use((req, res, next) => {
     console.log(`${req.method} ${req.path} - ${req.ip}`);
     next();
 });
-const port = 3000;
+const port = process.env.PORT || 3000;
 const WILI_BOX_1 = 'wiliboxas1';
 const WILI_BOX_2 = 'wiliboxas2';
 const WILI_BOX_3 = 'wiliboxas3';
@@ -80,7 +80,7 @@ app.get('/', (req, res) => {
     grid.forEach((row) => {
         string += row.join('') + '\n';
     });
-    res.send(string);
+    res.send({ map: string });
 });
 app.post('/', (req, res) => {
     var _a;
