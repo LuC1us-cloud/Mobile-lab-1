@@ -7,7 +7,7 @@
 	"scripts": {
 		"serve": "nodemon index.ts",
 		"build": "tsc",
-		"start": "npm run build && node index.js"
+		"start": "node index.js"
 	},
 	"devDependencies": {
 		"@types/express": "^4.17.14",
