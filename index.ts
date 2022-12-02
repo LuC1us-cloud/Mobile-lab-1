@@ -216,13 +216,13 @@ app.post('/', (req, res) => {
 });
 
 app.get('/signals', (req, res) => {
-	res.json(matavimai);
+	res.json({ signals: matavimai });
 });
 
 app.post('/signals', (req, res) => {
 	const matavimas: Matavimas = req.body;
 	matavimai.push(matavimas);
-	res.json(matavimas);
+	res.json({ signals: matavimai });
 });
 
 app.delete('/signals/:id', (req, res) => {
@@ -230,7 +230,7 @@ app.delete('/signals/:id', (req, res) => {
 	const matavimas = matavimai.find((m: Matavimas) => m.matavimas === id);
 	if (matavimas) {
 		matavimai.splice(matavimai.indexOf(matavimas), 1);
-		res.json(matavimas);
+		res.json({ signals: matavimai });
 	} else {
 		res.status(404).end();
 	}
