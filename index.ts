@@ -215,6 +215,27 @@ app.post('/', (req, res) => {
 	}
 });
 
+app.get('/signals', (req, res) => {
+	res.json(matavimai);
+});
+
+app.post('/signals', (req, res) => {
+	const matavimas: Matavimas = req.body;
+	matavimai.push(matavimas);
+	res.json(matavimas);
+});
+
+app.delete('/signals/:id', (req, res) => {
+	const id = Number(req.params.id);
+	const matavimas = matavimai.find((m: Matavimas) => m.matavimas === id);
+	if (matavimas) {
+		matavimai.splice(matavimai.indexOf(matavimas), 1);
+		res.json(matavimas);
+	} else {
+		res.status(404).end();
+	}
+});
+
 app.listen(port, () => {
 	console.log(`Timezones by location application is running on port ${port}.`);
 });
